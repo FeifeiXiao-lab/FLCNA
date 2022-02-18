@@ -9,7 +9,7 @@
 #' @param N The maximum number of iterations in the EM algorithm. The default value is 100.
 #' @param kms.iter The maximum number of iterations in kmeans algorithm for generating the starting value for the EM algorithm.
 #' @param kms.nstart The number of starting values in K-means.
-#' @param adapt.kms A indicator of using the cluster means estimated by K-means to calculate the adaptive parameters in APFP. The default value is FALSE.
+#' @param adapt.kms A indicator of using the cluster means estimated by K-means to calculate the adaptive parameters in FLCNV. The default value is FALSE.
 #' @param eps.diff The lower bound of pairwise difference of two mean values. Any value lower than it is treated as 0.
 #' @param eps.em The lower bound for the stopping criterion in the EM algorithm.
 #' @param iter.LQA The number of iterations in the estimation of cluster means by using the local quadratic approximation (LQA).
