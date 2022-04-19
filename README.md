@@ -14,7 +14,7 @@ library(devtools)
 install_github("FeiQin92/FLCNA")
 ```
 
-## Running FLCNV
+## Running FLCNA
 ### Examples
 
 ```r
