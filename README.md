@@ -11,7 +11,7 @@ Most CNA detection methods for scDNA-seq were designed to detect CNAs and identi
 ```r
 install.packages("devtools")
 library(devtools)
-install_github("FeiQin92/FLCNA")
+install_github("FeifeiXiaoUSC/FLCNA")
 ```
 
 ## Running FLCNA
