@@ -8,7 +8,9 @@ Description: We developed, FLCNA, a CNA detection method based on fused lasso mo
 License: GPL-3
 LazyData: TRUE
 Depends: 
-    R (>= 4.0)
+    R (>= 4.0),
+	mvtnorm,
+	stats
 URL: https://github.com/FeiQin92/FLCNA
 RoxygenNote: 7.1.2
 VignetteBuilder: knitr
