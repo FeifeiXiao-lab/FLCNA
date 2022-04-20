@@ -60,7 +60,7 @@ FLCNA <- function(tuning=NULL, K=NULL, lambda = c(1.5), y, N = 100, kms.iter = 1
   ##  2nd column = lambda, nonnegative real number.
   
   ## ----- check invalid numbers
-  y = as.matrix(y)
+  y = t(as.matrix(y))
   if (missing(tuning)){
     if(missing(K) | missing(lambda)){
       stop("Require a matrix of tuning parameters for 'tuning' or vectors for 'K' and 'lambda' ")
