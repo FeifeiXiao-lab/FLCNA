@@ -7,7 +7,7 @@
 FLCNA(
   tuning = NULL,
   K = NULL,
-  lambda = c(1.5),
+  lambda = c(5),
   y,
   N = 100,
   kms.iter = 100,
@@ -27,7 +27,7 @@ FLCNA(
 
 \item{K}{The number of clusters \eqn{K}.}
 
-\item{lambda}{The tuning parameter \eqn{\lambda} in the penalty term. The default is 1.5.}
+\item{lambda}{The tuning parameter \eqn{\lambda} in the penalty term. The default is 5.}
 
 \item{y}{A p-dimensional data matrix. Each row is an observation.}
 
