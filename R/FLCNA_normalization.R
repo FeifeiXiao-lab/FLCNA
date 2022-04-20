@@ -87,6 +87,7 @@ CorrectGC<-function(RC,GCContent,step){
   RCNormList<-list()
   RCNormList$Median<-MedianGC
   RCNormList$StepGC<-stepseq[1:(length(stepseq)-1)]
+  RCNormList$RCNorm<-RCNormMedian
   RCNormList
 }
 
