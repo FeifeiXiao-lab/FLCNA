@@ -29,7 +29,7 @@ dim(RD)
 ```r
 ref <- Example_ref_2000
 head(ref)
-```
+
 GRanges object with 6 ranges and 2 metadata columns:
       seqnames          ranges strand |        gc      mapp
          <Rle>       <IRanges>  <Rle> | <numeric> <numeric>
@@ -41,6 +41,8 @@ GRanges object with 6 ranges and 2 metadata columns:
   [6]     chr1 3200001-3300000      * |     56.83  0.973831
   -------
   seqinfo: 24 sequences from hg38 genome
+```
+
   
   
 ```r
