@@ -4,7 +4,7 @@
 #'
 #' @param tuning A 2-dimensional vector or a matrix with 2 columns, the first column is the number of clusters \eqn{K} and the second column is the tuning parameter \eqn{\lambda} in the penalty term. If this is missing, then \code{K} and \code{lambda} must be provided.
 #' @param K The number of clusters \eqn{K}.
-#' @param lambda The tuning parameter \eqn{\lambda} in the penalty term.
+#' @param lambda The tuning parameter \eqn{\lambda} in the penalty term. The default is 1.5.
 #' @param y A p-dimensional data matrix. Each row is an observation.
 #' @param N The maximum number of iterations in the EM algorithm. The default value is 100.
 #' @param kms.iter The maximum number of iterations in kmeans algorithm for generating the starting value for the EM algorithm.
@@ -52,7 +52,7 @@
 #' output
 #'
 #' @export
-FLCNA <- function(tuning=NULL, K=NULL, lambda = NULL, y, N = 100, kms.iter = 100, kms.nstart = 100, 
+FLCNA <- function(tuning=NULL, K=NULL, lambda = c(1.5), y, N = 100, kms.iter = 100, kms.nstart = 100, 
                  adapt.kms = FALSE, eps.diff = 1e-5, eps.em = 1e-5, iter.LQA = 20, eps.LQA = 1e-5, 
                  cutoff=0.5, L=100, model.crit = 'bic'){
   ##  tuning: a matrix with 2 columns;
@@ -108,7 +108,7 @@ FLCNA <- function(tuning=NULL, K=NULL, lambda = NULL, y, N = 100, kms.iter = 100
   ### --- outputs ---
   s.hat =list()	            # clustering labels
   mu.hat = list()						# cluster means
-  CNAdata = list()          # CNA output
+  # CNAdata = list()          # CNA output
   sigma.hat = list()				# cluster variance
   alpha.hat = list()        # Probability for each observation to be assigned into each cluster
   p.hat = list() 				    # cluster proportion
@@ -244,8 +244,8 @@ FLCNA <- function(tuning=NULL, K=NULL, lambda = NULL, y, N = 100, kms.iter = 100
       }      #ends of each estimates
       
       #CNA output
-      message(paste0("Start output CNA data for K=",K1,", lambda=",lambda1))
-      CNAdata[[j.tune]] <- CNA.out(mean.matrix=mu.hat[[j.tune]], cutoff=cutoff, L=L)
+      # message(paste0("Start output CNA data for K=",K1,", lambda=",lambda1))
+      # CNAdata[[j.tune]] <- CNA.out(mean.matrix=mu.hat[[j.tune]], cutoff=cutoff, L=L)
       
       ## ------------ BIC and GIC ----
       label.s = sort(unique(s.hat[[j.tune]]))

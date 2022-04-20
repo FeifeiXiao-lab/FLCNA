@@ -103,7 +103,7 @@ FLCNA_LQA <- function(k, K1, index.max, y, mu.t.all, mu.no.penal, sigma.all, alp
       else if(s == iter.num){
         out <- mu.k.hat[(s+1),]
         out[which(abs(out) < eps.diff)] <- 0
-        warning(paste('LQA for estimating mu does not converge for K=', K1, 'lambda=', lambda, sep=''))
+        # warning(paste('LQA for estimating mu does not converge for K=', K1, 'lambda=', lambda, sep=''))
       }
     }
   }  

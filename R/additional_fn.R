@@ -1,18 +1,22 @@
-require(mvtnorm)
-## ----- used in sapply to find all the densities
-
-## index = row index of mu
-## mu = K by p matrix, each row represents one cluster mean
-## y = n by p data matrix
-## sigma = p by p covariance matrix (assume same covariance for each cluster)
-## log.scale = T means output is log of the density
+#' @title dmvnorm_log
+#' @description Used in sapply to find all the densities
+#'
+#' @param index Row index of mu.
+#' @param mu K by p matrix, each row represents one cluster mean.
+#' @param y n by p data matrix.
+#' @param sigma p by p covariance matrix (assume same covariance for each cluster).
+#' 
+#' @importFrom mvtnorm dmvnorm
 dmvnorm_log <- function(index, mu, sigma, y) {
-  return(dmvnorm(y, mu[index,], sigma, log=TRUE))
+  return(mvtnorm::dmvnorm(y, mu[index,], sigma, log=TRUE))
 }
 
 
-## ----- compute the number of unique cluster means for each dimension
-## ----- used in compute BIC or GIC
+#' @title count.mu 
+#' @description Computing the number of unique cluster means for each dimension, which was used in computing BIC or GIC.
+#'
+#' @param mu.j Mean vector.
+#' @param eps.diff Lower bound of mean difference.
 count.mu <- function(mu.j, eps.diff) {
   temp.dist <- as.matrix(dist(mu.j, method = 'manhattan'))
   ct <- length(mu.j[abs(mu.j)>eps.diff])
