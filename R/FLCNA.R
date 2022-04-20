@@ -140,7 +140,7 @@ FLCNA <- function(tuning=NULL, K=NULL, lambda = NULL, y, N = 100, kms.iter = 100
     else if(lambda1 == 0)
     {
       temp.out <- nopenalty(K=K1, y=y, N=N, kms.iter=kms.iter, kms.nstart=kms.nstart, eps.diff=eps.diff,
-                            eps.em=eps.em, model.crit=model.crit, short.output = FALSE)
+                            eps.em=eps.em, model.crit=model.crit)
       mu.hat[[j.tune]]    <- temp.out$mu.hat.best
       sigma.hat[[j.tune]] <- temp.out$sigma.hat.best
       p.hat[[j.tune]]     <- temp.out$p.hat.best
@@ -178,7 +178,7 @@ FLCNA <- function(tuning=NULL, K=NULL, lambda = NULL, y, N = 100, kms.iter = 100
       ## use kmeans' results as the adaptive parameter
       if(adapt.kms == FALSE){
         temp.out <- nopenalty(K=K1, y=y, N=N, kms.iter=kms.iter, kms.nstart=kms.nstart, eps.diff=eps.diff, 
-                              eps.em=eps.em, model.crit=model.crit, short.output = TRUE)
+                              eps.em=eps.em, model.crit=model.crit)
         mu.no.penal <- temp.out$mu.hat.best
       }
       else {
