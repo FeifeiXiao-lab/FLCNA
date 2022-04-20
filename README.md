@@ -5,7 +5,7 @@ A statistical learning method for simultaneous copy number estimation and subclo
 Fei Qin, Guoshuai Cai, Feifei Xiao
 
 ## Description
-Most CNA detection methods for scDNA-seq were designed to detect CNAs and identify subclones in separate ways, which may generate spurious information (e.g., false positive CNAs) during the procedure of CNA detection and thereafter diminish the accuracy of identifying subpopulations from large complex cell group. To overcome this limitation, we developed a fused lasso mode-based framework, FLCNA, for CNA detection and simultaneous subclone identification in scDNA-seq data. 
+Most CNA detection methods for scDNA-seq were designed to detect CNAs and identify subclones in separate ways, which may generate spurious information (e.g., false positive CNAs) during the procedure of CNA detection and thereafter diminish the accuracy of identifying subpopulations from large complex cell group. To overcome this limitation, we developed a fused lasso mode-based framework, FLCNA, for CNA detection and simultaneous subclone identification in scDNA-seq data. First, procedures including quality control (QC), normalization, logarithm transformation were used for pre-processing of the datasets. Subclone clustering was achieved based on a Gaussian Mixture Model (GMM), and breakpoints detection was conducted by adding a fused lasso penalty term to the typical GMM model. Finally, shared CNA segments in each cluster were clustered into three different CNA states (deletion, normal/diploid and duplication) using a GMM-based clustering strategy.
 
 ## Installation
 ```r
@@ -19,4 +19,43 @@ install_github("FeifeiXiaoUSC/FLCNA")
 
 ```r
 library(FLCNV)
+data(Example_data_2000)
+data(Example_ref_2000)
+RD <- Example_data_2000
+dim(RD)
+```
+[1]  200 2000
+
+```r
+ref <- Example_ref_2000
+head(ref)
+```
+GRanges object with 6 ranges and 2 metadata columns:
+      seqnames          ranges strand |        gc      mapp
+         <Rle>       <IRanges>  <Rle> | <numeric> <numeric>
+  [1]     chr1 2000001-2100000      * |     56.96  0.984862
+  [2]     chr1 2800001-2900000      * |     57.94  0.992544
+  [3]     chr1 2900001-3000000      * |     55.43  0.984850
+  [4]     chr1 3000001-3100000      * |     56.60  0.995182
+  [5]     chr1 3100001-3200000      * |     58.16  0.989534
+  [6]     chr1 3200001-3300000      * |     56.83  0.973831
+  -------
+  seqinfo: 24 sequences from hg38 genome
+  
+  
+```r
+QCobject <- FLCNA_QC(Y_raw=t(RD), ref_raw=ref,
+                     cov_thresh = 0, 
+                     minCountQC = 10, 
+                     mapp_thresh = 0.9,
+                     gc_thresh = c(20, 80))
+```
+```r
+log2Rdata <- FLCNA_normalization(Y=QCobject$Y, gc=QCobject$ref$gc, map=QCobject$ref$mapp)
+```
+```r
+output_FLCNA <- FLCNA(K=c(4,5,6), lambda=3, Y=data.matrix(log2Rdata))
+```
+```r
+CNA.output <- CNA.out(mean.matrix = res$mu.hat.best, cutoff=0.35, L=100)
 ```
