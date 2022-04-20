@@ -23,8 +23,9 @@ data(Example_data_2000)
 data(Example_ref_2000)
 RD <- Example_data_2000
 dim(RD)
-```
 [1]  200 2000
+```
+
 
 ```r
 ref <- Example_ref_2000
@@ -43,21 +44,25 @@ GRanges object with 6 ranges and 2 metadata columns:
   seqinfo: 24 sequences from hg38 genome
 ```
 
-  
-  
+ 
 ```r
+# Quality Control 
 QCobject <- FLCNA_QC(Y_raw=t(RD), ref_raw=ref,
                      cov_thresh = 0, 
                      minCountQC = 10, 
                      mapp_thresh = 0.9,
                      gc_thresh = c(20, 80))
 ```
+
 ```r
+# Normalization
 log2Rdata <- FLCNA_normalization(Y=QCobject$Y, gc=QCobject$ref$gc, map=QCobject$ref$mapp)
 ```
 ```r
+# Simultaneous CNA detection and subclone clustering
 output_FLCNA <- FLCNA(K=c(4,5,6), lambda=3, Y=data.matrix(log2Rdata))
 ```
 ```r
+# CNA clustering
 CNA.output <- CNA.out(mean.matrix = res$mu.hat.best, cutoff=0.35, L=100)
 ```
