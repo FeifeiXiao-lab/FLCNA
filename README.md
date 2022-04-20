@@ -18,6 +18,7 @@ install_github("FeifeiXiaoUSC/FLCNA")
 ### Examples
 
 ```r
+# The example data have 2,000 markers and 200 cells.
 library(FLCNV)
 data(Example_data_2000)
 data(Example_ref_2000)
