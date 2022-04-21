@@ -4,7 +4,7 @@
 \alias{CNA.out}
 \title{Shared CNA output}
 \usage{
-CNA.out(mean.matrix, cutoff = 0.35, L = 100)
+CNA.out(mean.matrix, ref, cutoff = 0.35, L = 100)
 }
 \arguments{
 \item{mean.matrix}{The cluster mean matrix estimated from FLCNA R function.}
@@ -18,6 +18,7 @@ The return is the clustered CNA segments with start position, end position and c
 \item{state}{The CNA states assigned.}
 \item{start}{The start point of CNAs.}
 \item{end}{The end point of CNAs.}
+\item{chr}{Chromosome of CNAs.}
 \item{width}{The width of CNAs.}
 }
 \description{

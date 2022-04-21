@@ -8,7 +8,7 @@ FLCNA(
   tuning = NULL,
   K = NULL,
   lambda = c(5),
-  y,
+  Y,
   N = 100,
   kms.iter = 100,
   kms.nstart = 100,
@@ -28,8 +28,6 @@ FLCNA(
 \item{K}{The number of clusters \eqn{K}.}
 
 \item{lambda}{The tuning parameter \eqn{\lambda} in the penalty term. The default is 5.}
-
-\item{y}{A p-dimensional data matrix. Each row is an observation.}
 
 \item{N}{The maximum number of iterations in the EM algorithm. The default value is 100.}
 
@@ -52,6 +50,8 @@ FLCNA(
 \item{L}{Repeat times in the EM algorithm while outputing CNA data, defaults to 100.}
 
 \item{model.crit}{The criterion used to select the number of clusters \eqn{K}. It is either `bic' for Bayesian Information Criterion or `gic' for Generalized Information Criterion.}
+
+\item{y}{A p-dimensional data matrix. Each row is an observation.}
 }
 \value{
 This function returns the esimated parameters and some statistics of the optimal model within the given \eqn{K} and \eqn{\lambda}, which is selected by BIC when \code{model.crit = 'bic'} or GIC when \code{model.crit = 'gic'}.
