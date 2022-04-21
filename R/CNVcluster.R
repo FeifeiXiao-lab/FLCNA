@@ -14,7 +14,7 @@
 #' \item{width}{The width of CNAs.}
 #'
 #' @export
-CNA.out <- function(mean.matrix, cutoff=0.35, L=100){
+CNA.out <- function(mean.matrix, ref, cutoff=0.35, L=100){
   CNAdata <- vector(mode = "list", length = nrow(mean.matrix))
   for (g in 1:nrow(mean.matrix)){
     cp.index <- 1+which(abs(diff(mean.matrix[g,],1))>=cutoff)
@@ -24,7 +24,11 @@ CNA.out <- function(mean.matrix, cutoff=0.35, L=100){
     if (length(x.inv$CNA.end)==0){
       next
     }
-    CNAdata[[g]] <- data.frame(state=res$CNA.state, start=res$CNA.start, end=res$CNA.end, width=(res$CNA.end-res$CNA.start+1))
+    CNAdata[[g]] <- data.frame(state=res$CNA.state, 
+                               start=ref@ranges@start[res$CNA.start], 
+                               end=(ref@ranges@start+ref@ranges@width)[res$CNA.end], 
+                               chr=ref@seqnames@values[res$CNA.start],
+                               width_bins=(res$CNA.end-res$CNA.start+1))
   }
   return(CNAdata)
 }
