@@ -11,6 +11,7 @@
 #' \item{state}{The CNA states assigned.}
 #' \item{start}{The start point of CNAs.}
 #' \item{end}{The end point of CNAs.}
+#' \item{chr}{Chromosome of CNAs.}
 #' \item{width}{The width of CNAs.}
 #'
 #' @export
