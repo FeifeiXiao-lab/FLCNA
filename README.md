@@ -23,6 +23,7 @@ library(FLCNA)
 data(Example_data_2000)
 data(Example_ref_2000)
 RD <- Example_data_2000
+ref <- Example_ref_2000
 dim(RD)
 [1]  200 2000
 ```
