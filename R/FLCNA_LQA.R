@@ -1,3 +1,7 @@
+#' @title Matrix calculation
+#' 
+#' @importFrom Rcpp sourceCpp
+#' @useDynLib <FLCNA>
 Rcpp::cppFunction(depends = "RcppArmadillo", code = '
          Rcpp::List flowCalcCpp(const arma::mat &Am, const arma::mat &Cm) {
          arma::mat B = inv(Am) * Cm;
