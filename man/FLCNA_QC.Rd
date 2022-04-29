@@ -4,23 +4,12 @@
 \alias{FLCNA_QC}
 \title{FLCNA_QC}
 \usage{
-FLCNA_QC(
-  Y_raw,
-  ref_raw,
-  cov_thresh = 0,
-  minCountQC = 20,
-  mapp_thresh = 0.9,
-  gc_thresh = c(20, 80)
-)
+FLCNA_QC(Y_raw, ref_raw, mapp_thresh = 0.9, gc_thresh = c(20, 80))
 }
 \arguments{
 \item{Y_raw}{raw read count matrix.}
 
 \item{ref_raw}{raw GRanges object with corresponding GC content and mappability for quality control.}
-
-\item{cov_thresh}{scalar variable specifying the lower bound of read count summation of each cell. Default is \code{0}.}
-
-\item{minCountQC}{the minimum read coverage required for normalization and EM fitting. Defalut is \code{20}.}
 
 \item{mapp_thresh}{scalar variable specifying mappability of each genomic bin. Default is \code{0.9}.}
 

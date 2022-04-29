@@ -29,6 +29,8 @@ FLCNA(
 
 \item{lambda}{The tuning parameter \eqn{\lambda} in the penalty term. The default is 5.}
 
+\item{Y}{A p-dimensional data matrix. Each row is an observation.}
+
 \item{N}{The maximum number of iterations in the EM algorithm. The default value is 100.}
 
 \item{kms.iter}{The maximum number of iterations in kmeans algorithm for generating the starting value for the EM algorithm.}
@@ -50,8 +52,6 @@ FLCNA(
 \item{L}{Repeat times in the EM algorithm while outputing CNA data, defaults to 100.}
 
 \item{model.crit}{The criterion used to select the number of clusters \eqn{K}. It is either `bic' for Bayesian Information Criterion or `gic' for Generalized Information Criterion.}
-
-\item{y}{A p-dimensional data matrix. Each row is an observation.}
 }
 \value{
 This function returns the esimated parameters and some statistics of the optimal model within the given \eqn{K} and \eqn{\lambda}, which is selected by BIC when \code{model.crit = 'bic'} or GIC when \code{model.crit = 'gic'}.
@@ -81,8 +81,8 @@ This function returns the esimated parameters and some statistics of the optimal
 Simultaneous CNA detection and subclone identification using single cell DNA sequencing data.
 }
 \examples{
-y <- matrix(rnorm(10000, 0, 0.5),10, 1000)
-output <- FLCNA(K = c(1:2), lambda = c(0,1), y=y)
+Y <- matrix(rnorm(10000, 0, 0.5),10, 1000)
+output <- FLCNA(K = c(1:2), lambda = c(2,3), Y=Y)
 output
 
 }
