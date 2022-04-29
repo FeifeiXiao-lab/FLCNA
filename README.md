@@ -45,12 +45,10 @@ GRanges object with 6 ranges and 2 metadata columns:
   seqinfo: 24 sequences from hg38 genome
 ```
 
- 
 ```r
 # Quality Control 
-QCobject <- FLCNA_QC(Y_raw=t(RD), ref_raw=ref,
-                     cov_thresh = 0, 
-                     minCountQC = 10, 
+QCobject <- FLCNA_QC(Y_raw=t(RD), 
+                     ref_raw=ref,
                      mapp_thresh = 0.9,
                      gc_thresh = c(20, 80))
 ```
