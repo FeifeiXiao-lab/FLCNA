@@ -24,12 +24,12 @@ install_github("FeifeiXiaoUSC/FLCNA")
 ```
 
 # 3.  Bioinformatic pre-processing
-For public data from NCBI SRA, starting with SRA files, FASTQ files are generated with Fastq-dump from SRA-Toolkit, and then aligned to NCBI hg19 reference genome and converted to BAM files. For the 10× Genomics datasets, we demultiplexed the original integrated BAM file into separate BAM files. Raw read depth of coverage data are generated from the BAM files with bin size 100kb. SCOPE R package can be utilized for generating coverage data, mappability and GC content. Specifically, get_bam_bed() can be used for generating bed files. get_coverage_scDNA() function can be applied for computing the depth of coverage for each cell and each marker. get_mapp() and get_gc() function can be used to calculate mappability and GC content, respectively. 
+For public data from NCBI SRA, starting with SRA files, FASTQ files can be generated with Fastq-dump from SRA-Toolkit, and then aligned to NCBI hg19 reference genome and converted to BAM files. For the 10× Genomics datasets, we need to demultiplex the original integrated BAM file into separate BAM files. Raw read depth of coverage data are generated from the BAM files with bin size 100kb. SCOPE R package can be utilized for generating coverage data, mappability and GC content. Specifically, get_bam_bed() can be used for generating bed files. get_coverage_scDNA() function can be applied for computing the depth of coverage for each cell and each marker. get_mapp() and get_gc() function can be used to calculate mappability and GC content, respectively. 
 
 
 # 4. Quality Control
 
-FLCNV_QC() R function can be ued to remove samples/cells with low proportion of reads and bins that have extreme GC content (less than 20% and greater than 80%) and low mappability (less than 0.9) to reduce artifacts.
+FLCNA_QC() R function can be ued to remove bins that have extreme GC content (less than 20% and greater than 80%) and low mappability (less than 0.9) to reduce artifacts.
 
 ```{r, message=FALSE, warning = FALSE}
 # The example data have 2,000 markers and 200 cells.
@@ -47,15 +47,13 @@ head(ref)
 
 ```{r, message=TRUE, warning = FALSE}
 QCobject <- FLCNA_QC(Y_raw=t(RD), ref_raw=ref,
-                     cov_thresh = 0, 
-                     minCountQC = 10, 
                      mapp_thresh = 0.9,
                      gc_thresh = c(20, 80))
 ```
 
 # 5. Normalization
 
-A two-step median normalization approach is implemented to remove the effect of biases from the GC-content and mappability. We further calculated the ratio of normalized RC and its sample specific mean, and the logarithm transformation of this ratio (log2R-NRC) is used in the main step of the FLCNA method. FLCNA_normalization() R function is used for the normalization. 
+A two-step median normalization approach is implemented to remove the effect of biases from the GC-content and mappability. We further calculate the ratio of normalized RC and its sample specific mean, and the logarithm transformation of this ratio (log2R-NRC) is used in the main step of the FLCNA method. FLCNA_normalization() R function is used for the normalization. 
 
 ```{r, message=TRUE, warning = FALSE}
 log2Rdata <- FLCNA_normalization(Y=QCobject$Y, gc=QCobject$ref$gc, map=QCobject$ref$mapp)
@@ -63,15 +61,16 @@ log2Rdata <- FLCNA_normalization(Y=QCobject$Y, gc=QCobject$ref$gc, map=QCobject$
 
 # 6. Simultaneous CNA detection and subclone clustering
 
-Subclone clustering is achieved based on a GMM, and breakpoints detection is conducted by adding a fused lasso penalty term to the typical GMM model. FLCNA() R function can be used for the CNA detection and simultaneous subclone clustering. There are are two hyperparameters to be pre-defined in the FLCNA method, including the number of clusters K and the tuning parameter lambda. The tuning hyperparameter lambda is used to control the overall number of change points that less change points will tend to be generated with larger lambda value. To find the optimal values of K and lambda, we used a BIC-type criterion, and the model with smallest BIC value is selected as the optimal model. 
+Subclone clustering is achieved based on a GMM, and breakpoints detection is conducted by adding a fused lasso penalty term to the typical GMM model. FLCNA() R function can be used for the CNA detection and simultaneous subclone clustering. There  are two hyperparameters to be pre-defined in the FLCNA method, including the number of clusters K and the tuning parameter lambda. The tuning hyperparameter lambda is used to control the overall number of change points that less change points tend to be generated with larger lambda value. To find the optimal values of K and lambda, we use a BIC-type criterion, and the model with smallest BIC value is selected as the optimal model. 
 
 ```{r, message=TRUE, warning = FALSE, eval=FALSE}
+# K: The number of clusters.
+# lambda: The tuning parameter in the penalty term, the default is 3.
 output_FLCNA <- FLCNA(K=c(4,5,6), lambda=3, Y=data.matrix(log2Rdata))
 ```
 
-```{r, message=TRUE, warning = FALSE}
+```{r, message=FALSE, warning = FALSE, echo=FALSE}
 data(output_FLCNA)
-output_FLCNA$K.best
 ```
 
 ```{r, message=TRUE, warning = FALSE}
@@ -94,6 +93,10 @@ output_FLCNA$s.hat.best
 After the mean vector is estimated for each cluster, we locate and quantify all the change points, and identify segments that share the same underlying copy number profile. CNA.out() R function is used for the clustering of candidate CNAs. Change-point can be identified from the estimate of mean vector where for the marker before and after the change point show different values. Typically, different CNA states are required to be assigned for each segment to help locate significant CNA signatures. For each cluster, to assign the most likely copy number state for each segment, we further implemented a GMM-based clustering strategy for CNA clustering based on the estimate of mean vector. Each segment will be classified using a three-state classification scheme with deletion, normal/diploid and duplication.  
 
 ```{r, message=FALSE, warning = FALSE}
+# mean.matrix: The cluster mean matrix estimated from FLCNA R function.
+# cutoff: Cutoff value to further control the number of CNAs, the larger value of cutoff, 
+# the smaller number of CNAs. The default is 0.35.
+# L: Repeat times in the EM algorithm, defaults to 100.
 CNA.output <- CNA.out(mean.matrix = output_FLCNA$mu.hat.best, ref=ref, cutoff=0.35, L=100)
 CNA.output
 ```
