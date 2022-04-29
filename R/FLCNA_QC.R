@@ -5,8 +5,6 @@
 #'
 #' @param Y_raw raw read count matrix.
 #' @param ref_raw raw GRanges object with corresponding GC content and mappability for quality control.
-#' @param cov_thresh scalar variable specifying the lower bound of read count summation of each cell. Default is \code{0}.
-#' @param minCountQC the minimum read coverage required for normalization and EM fitting. Defalut is \code{20}.
 #' @param mapp_thresh scalar variable specifying mappability of each genomic bin. Default is \code{0.9}.
 #' @param gc_thresh vector specifying the lower and upper bound of GC content threshold for quality control. Default is \code{20-80}.
 #'
@@ -19,8 +17,6 @@
 #' @export
 FLCNA_QC <- function(Y_raw, 
                      ref_raw,
-                     cov_thresh = 0, 
-                     minCountQC = 20, 
                      mapp_thresh = 0.9,
                      gc_thresh = c(20, 80)) {
   
@@ -33,18 +29,7 @@ FLCNA_QC <- function(Y_raw,
   mapp <- ref_raw$mapp
   gc <- ref_raw$gc
   
-  ##sample based QC
-  sampfilter1 <- (apply(Y_raw, 2, sum) <= cov_thresh)
-  message("Removed ", sum(sampfilter1),
-          " samples due to failed library preparation.")
-  sampfilter2 <- (apply(Y_raw, 2, mean) <= minCountQC)
-  message("Removed ", sum(sampfilter2),
-          " samples due to failure to meet min coverage requirement.")    
-  if (sum(sampfilter1 | sampfilter2) != 0) {
-    Y <- Y_raw[, !(sampfilter1 | sampfilter2)]
-  } else {
-    Y <- Y_raw
-  }
+  Y <- Y_raw
   
   ##Bin based QC
   binfilter1 <- (gc < gc_thresh[1] | gc > gc_thresh[2])

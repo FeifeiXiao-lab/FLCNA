@@ -8,6 +8,7 @@
 #' 
 #' @importFrom mvtnorm dmvnorm
 dmvnorm_log <- function(index, mu, sigma, y) {
+  
   return(mvtnorm::dmvnorm(y, mu[index,], sigma, log=TRUE))
 }
 
