@@ -28,7 +28,7 @@ CNA.out <- function(mean.matrix, ref, cutoff=0.35, L=100){
     CNAdata[[g]] <- data.frame(state=res$CNA.state, 
                                start=ref@ranges@start[res$CNA.start], 
                                end=(ref@ranges@start+ref@ranges@width)[res$CNA.end], 
-                               chr=rep(ref@seqnames@values, each=ref@seqnames@lengths)[res$CNA.start],
+                               chr=rep(ref@seqnames@values, ref@seqnames@lengths)[res$CNA.start],
                                width_bins=(res$CNA.end-res$CNA.start+1))
   }
   return(CNAdata)
