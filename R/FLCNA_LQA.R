@@ -1,8 +1,3 @@
-
-#' @title flowCalcCpp
-#' @description Matrix calculation using Rcpp package
-#'
-#' @export
 Rcpp::cppFunction(depends = "RcppArmadillo", code = '
          Rcpp::List flowCalcCpp(const arma::mat &Am, const arma::mat &Cm) {
          arma::mat B = inv(Am) * Cm;
