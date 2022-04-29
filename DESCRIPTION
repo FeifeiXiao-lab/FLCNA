@@ -1,6 +1,6 @@
 Package: FLCNA
 Type: Package
-Title: Simultaneous CNV Detection And Subclone Clustering With Single Cell Sequencing Data
+Title: Simultaneous CNA Detection And Subclone Clustering With Single Cell Sequencing Data
 Version: 1.0
 Date: 2022-04-19
 Authors: Fei Qin, Guoshuai Cai, Feifei Xiao
