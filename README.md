@@ -64,5 +64,5 @@ output_FLCNA <- FLCNA(K=c(4,5,6), lambda=3, Y=data.matrix(log2Rdata))
 ```
 ```r
 # CNA clustering
-CNA.output <- CNA.out(mean.matrix = output_FLCNA$mu.hat.best, cutoff=0.35, L=100)
+CNA.output <- CNA.out(mean.matrix = output_FLCNA$mu.hat.best, ref=ref, cutoff=0.35, L=100)
 ```
