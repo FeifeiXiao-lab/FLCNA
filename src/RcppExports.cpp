@@ -12,13 +12,13 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // flowCalcCpp
-arma::mat flowCalcCpp(const arma::mat Am, const arma::mat Cm);
+Rcpp::List flowCalcCpp(const arma::mat& Am, const arma::mat& Cm);
 RcppExport SEXP _FLCNA_flowCalcCpp(SEXP AmSEXP, SEXP CmSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::mat >::type Am(AmSEXP);
-    Rcpp::traits::input_parameter< const arma::mat >::type Cm(CmSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type Am(AmSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type Cm(CmSEXP);
     rcpp_result_gen = Rcpp::wrap(flowCalcCpp(Am, Cm));
     return rcpp_result_gen;
 END_RCPP

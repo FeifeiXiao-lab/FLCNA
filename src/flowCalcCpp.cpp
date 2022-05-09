@@ -1,6 +1,6 @@
-// [[Rcpp::depends(RcppArmadillo)]]
-#include <RcppArmadillo.h>
+#include "RcppArmadillo.h"
 
+// [[Rcpp::depends(RcppArmadillo)]]
 
 //' Matrix calculation in RcppArmadillo.
 //'
@@ -8,8 +8,8 @@
 //' @param Cm matrix
 //' @return Matrix, that is \code{inv(Am)%*%Cm}
 // [[Rcpp::export]]
-arma::mat flowCalcCpp(const arma::mat Am, const arma::mat Cm) 
+Rcpp::List flowCalcCpp(const arma::mat &Am, const arma::mat &Cm) 
 {
-         arma::mat B = inv(Am) * Cm;
-         return B;
+    arma::mat B = inv(Am) * Cm;
+    return Rcpp::List::create( Rcpp::Named("Imp") = B);
 }
