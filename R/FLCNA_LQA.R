@@ -1,14 +1,3 @@
-#' @title Matrix calculation
-#' 
-#' @importFrom Rcpp sourceCpp
-#' @useDynLib FLCNA
-Rcpp::cppFunction(depends = "RcppArmadillo", code = '
-         Rcpp::List flowCalcCpp(const arma::mat &Am, const arma::mat &Cm) {
-         arma::mat B = inv(Am) * Cm;
-         return Rcpp::List::create( Rcpp::Named("Imp") = B);
-      }')
-
-
 #' @title Esimation of mean matrix
 #' 
 #' @description Esimation of mean matrix based on local quadratic approximation (LQA).
