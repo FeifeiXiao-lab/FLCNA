@@ -5,7 +5,7 @@
 #'
 #' @param Am matrix
 #' @param Cm matrix
-#' @return Matrix calculation, that is \code{inv(Am)%*%Cm}
+#' @return Matrix, that is \code{inv(Am)%*%Cm}
 flowCalcCpp <- function(Am, Cm) {
     .Call('_FLCNA_flowCalcCpp', PACKAGE = 'FLCNA', Am, Cm)
 }
