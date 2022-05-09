@@ -1,6 +1,6 @@
 Package: FLCNA
 Type: Package
-Title: Simultaneous CNA Detection And Subclone Clustering With Single Cell Sequencing Data
+Title: Simultaneous CNV Detection And Subclone Clustering With Single Cell Sequencing Data
 Version: 1.0
 Date: 2022-04-19
 Authors: Fei Qin, Guoshuai Cai, Feifei Xiao
@@ -11,10 +11,12 @@ Depends:
     R (>= 4.0),
 	mvtnorm,
 	stats
-URL: https://github.com/FeiQin92/FLCNA
+URL: https://github.com/FeifeiXiaoUSC/FLCNA
 RoxygenNote: 7.1.2
 VignetteBuilder: knitr
 Encoding: UTF-8
 Language: en-GB
+Imports: Rcpp (>= 1.0.8)
+LinkingTo: Rcpp, RcppArmadillo
 Suggests: 
     rmarkdown
