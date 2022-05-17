@@ -11,21 +11,21 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// flowCalcCpp_I
-Rcpp::List flowCalcCpp_I(const arma::mat& Am, const arma::mat& Cm);
-RcppExport SEXP _FLCNA_flowCalcCpp_I(SEXP AmSEXP, SEXP CmSEXP) {
+// flowCalcCpp
+Rcpp::List flowCalcCpp(const arma::mat& Am, const arma::mat& Cm);
+RcppExport SEXP _FLCNA_flowCalcCpp(SEXP AmSEXP, SEXP CmSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type Am(AmSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type Cm(CmSEXP);
-    rcpp_result_gen = Rcpp::wrap(flowCalcCpp_I(Am, Cm));
+    rcpp_result_gen = Rcpp::wrap(flowCalcCpp(Am, Cm));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_FLCNA_flowCalcCpp_I", (DL_FUNC) &_FLCNA_flowCalcCpp_I, 2},
+    {"_FLCNA_flowCalcCpp", (DL_FUNC) &_FLCNA_flowCalcCpp, 2},
     {NULL, NULL, 0}
 };
 
