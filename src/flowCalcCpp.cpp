@@ -2,6 +2,8 @@
 
 // [[Rcpp::depends(RcppArmadillo)]]
 
+using namespace Rcpp;
+
 //' Matrix calculation in RcppArmadillo.
 //'
 //' @param Am matrix
