@@ -5,7 +5,7 @@ A statistical learning method for simultaneous copy number estimation and subclo
 Fei Qin, Guoshuai Cai, Feifei Xiao
 
 ## Description
-Most CNA detection methods for scDNA-seq were designed to detect CNAs and identify subclones in separate ways, which may generate spurious information (e.g., false positive CNAs) during the procedure of CNA detection and thereafter diminish the accuracy of identifying subpopulations from large complex cell group. To overcome this limitation, we developed a fused lasso mode-based framework, FLCNA, for CNA detection and simultaneous subclone identification in scDNA-seq data. First, procedures including quality control (QC), normalization, logarithm transformation were used for pre-processing of the datasets. Subclone clustering was achieved based on a Gaussian Mixture Model (GMM), and breakpoints detection was conducted by adding a fused lasso penalty term to the typical GMM model. Finally, shared CNA segments in each cluster were clustered into three different CNA states (deletion, normal/diploid and duplication) using a GMM-based clustering strategy.
+Most CNA detection methods for scDNA-seq were designed to detect CNAs and identify subclones in separate ways, which may generate spurious information (e.g., false positive CNAs) during the procedure of CNA detection and thereafter diminish the accuracy of identifying subpopulations from large complex cell group. To overcome this limitation, we developed a fused lasso mode-based framework, FLCNA, for CNA detection and simultaneous subclone identification in scDNA-seq data. First, procedures including quality control (QC), normalization, logarithm transformation were used for pre-processing of the datasets. Subclone clustering was achieved based on a Gaussian Mixture Model (GMM), and breakpoints detection was conducted by adding a fused lasso penalty term to the typical GMM model. Finally, based on these shared breakpoints in each cluster, candidate CNA segments for each cell were clustered into different CNA states using a GMM-based clustering strategy. 
 
 ## Installation
 ```r
@@ -64,5 +64,5 @@ output_FLCNA <- FLCNA(K=c(4,5,6), lambda=3, Y=data.matrix(log2Rdata))
 ```
 ```r
 # CNA clustering
-CNA.output <- CNA.out(mean.matrix = output_FLCNA$mu.hat.best, ref=ref, cutoff=0.35, L=100)
+CNA.output <- CNA.out(mean.matrix = output_FLCNA$mu.hat.best, LRR=log2Rdata, Clusters=output$s.hat.best, ref=ref, cutoff=0.35, L=100)
 ```
