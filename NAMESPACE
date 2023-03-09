@@ -4,7 +4,6 @@ importFrom(Rcpp, evalCpp)
 
 
 export(CNA.out)
-export(CNA.out.eachcell)
 export(FLCNA)
 export(FLCNA_QC)
 export(FLCNA_normalization)
