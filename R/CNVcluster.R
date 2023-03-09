@@ -15,64 +15,39 @@
 #' \item{width}{The width of CNAs.}
 #'
 #' @export
-CNA.out <- function(mean.matrix, ref, cutoff=0.35, L=100){
-  CNAdata <- vector(mode = "list", length = nrow(mean.matrix))
-  for (g in 1:nrow(mean.matrix)){
-    cp.index <- 1+which(abs(diff(mean.matrix[g,],1))>=cutoff)
-    if ((length(cp.index) < 1) | (length(cp.index) > 1000)){ next }
-    x.inv  <- try( res <- CNAcluster(Y = mean.matrix[g,], cp=cp.index, L),  silent=TRUE)
-    if ('try-error' %in% class(x.inv)) next
-    if (length(x.inv$CNA.end)==0){
-      next
-    }
-    CNAdata[[g]] <- data.frame(state=res$CNA.state, 
-                               start=ref@ranges@start[res$CNA.start], 
-                               end=(ref@ranges@start+ref@ranges@width)[res$CNA.end], 
-                               chr=rep(ref@seqnames@values, ref@seqnames@lengths)[res$CNA.start],
-                               width_bins=(res$CNA.end-res$CNA.start+1))
-  }
-  return(CNAdata)
-}
-
-
-
-#' @title CNA output for each cell
-#' 
-#' @description This function clusters the identified change-points to make final CNA calling for each cell. The potential CNA segments between two neighbor candidate change-points are assigned to different copy number states according to the estimated mean matrix from FLCNA R function and log2R data for each cell. We use three clusters including duplication, normal state and deletion. A Gaussisan Mixture Model based clustering strategy was applied to assign each segment to the most likely cluster/state.
-#'
-#' @param mean.matrix The cluster mean matrix estimated from FLCNA R function.
-#' @param log2R.NRC Log2R data from normalization of original read counts.
-#' @param cluster.index Cluster index for all the cells.
-#' @param cutoff Cutoff value to further control the number of CNAs, the larger value of cutoff, the smaller number of CNAs. The default is 0.35.
-#' @param L Repeat times in the EM algorithm, defaults to 100.
 #' 
 #' 
-#' @return The return is the clustered CNA segments by presenting the start position and end position using CNA marker index, and the copy number states.
-#' \item{state}{The CNA states assigned.}
-#' \item{start}{The start point for CNAs.}
-#' \item{end}{The end point for CNAs.}
-#' \item{width}{The width for CNAs.}
-#' \item{sample}{Sample index.}
-#'
-#' @export
-CNA.out.eachcell <- function(mean.matrix, log2R.NRC, cluster.index, cutoff=0.5, L=100){
+CNA.out <- function(mean.matrix, LRR, Clusters, ref, cutoff=0.40, L=100){
   CNAdata <- NULL
-  for (i in 1:ncol(log2R.NRC)){
-    cp.index <- 1+which(abs(diff(mean.matrix[cluster.index[i],],1))>=cutoff)
-    if (length(cp.index)==1){
-      next
-    }
-    x.inv  <- try(res <- CNAcluster(Y = as.numeric(log2R.NRC[,i]), cp=cp.index, L),  silent=TRUE)
+  for (s in 1:ncol(LRR)){
+    g=Clusters[s]
+    cp.index <- 1+which(abs(diff(mean.matrix[g,],1))>=cutoff)
+    if ((length(cp.index) < 1) | (length(cp.index) > 10000)){ next }
+    x.inv  <- try( res <- CNAcluster(Y = LRR[,s], cp=cp.index, L),  silent=TRUE)
     if ('try-error' %in% class(x.inv)) next
     if (length(x.inv$CNA.end)==0){
       next
     }
-    # tryCatch(res <- CNAcluster(Y = as.numeric(log2R.NRC[,i]), cp=cp.index, L), error = function(e), { next })
-    CNA <- data.frame(state=res$CNA.state, start=res$CNA.start, end=res$CNA.end, width=(res$CNA.end-res$CNA.start+1), sample=i)
-    CNAdata <- rbind(CNAdata, CNA)
-  }
-  return(CNAdata)
+    CNAdata1 <- data.frame(sampleID=s,
+                          samplename=colnames(LRR)[s],
+                          Cluster=g,
+                          chr=rep(ref@seqnames@values, ref@seqnames@lengths)[res$CNA.start],
+                          start=res$CNA.start, 
+                          end=res$CNA.end,
+                          start.coor=ref@ranges@start[res$CNA.start],
+                          end.coor=(ref@ranges@start+ref@ranges@width)[res$CNA.end],
+                          width_bins=(res$CNA.end-res$CNA.start+1),
+                          state=res$CNA.state)
+    CNAdata1 <- CNAdata1[CNAdata1$width_bins > 2,]
+    CNAdata1 <- CNAdata1[CNAdata1$width_bins < 10000,]
+
+    CNAdata <- rbind(CNAdata, CNAdata1)
 }
+return(CNAdata)
+}
+
+
+
 
 
 #' @title CNAcluster
@@ -91,13 +66,14 @@ CNA.out.eachcell <- function(mean.matrix, log2R.NRC, cluster.index, cutoff=0.5, 
 #' \item{CNA.end}{End position of each CNA.}
 CNAcluster <-function(Y, cp, L) {
  
-  st = 3
-  mu = c(-1, 0, 1)
+  st = 5
+  mu = c(-2.3, -0.75, 0, 0.5, 1.0)
   p = rep(1/st, st)
   sigma = rep(0.1, st)
   priors <- list(p = p, mu = mu, sigma = sigma)
   EM = gausianMixture(x=Y, cp, priors=priors, L, st=st)
-
+  EM$state.new
+  
   newcp = EM$cp.final   
   h = EM$index.final
   CNA.state <- getState(EM = EM)
@@ -120,16 +96,18 @@ CNAcluster <-function(Y, cp, L) {
 getState <-function (EM = EM) {
   state      = EM$state.new
   cp.f       = EM$cp.final
-  start.index  = which(state!=2)  
+  start.index  = which(state!=3)  
   CNA.start     = cp.f[start.index]
   CNA.start = CNA.start[!is.na(CNA.start)]
   CNA.end = cp.f[start.index+1]
   CNA.end = CNA.end[!is.na(CNA.end)]
   CNA.state = state[start.index]
   
-  CNA.state[which(CNA.state == 1)] = "del"
-  CNA.state[which(CNA.state == 3)] = "dup"
-
+  CNA.state[which(CNA.state == 1)] = "Del.d"
+  CNA.state[which(CNA.state == 2)] = "Del.s"
+  CNA.state[which(CNA.state == 4)] = "Dup.s"
+  CNA.state[which(CNA.state == 5)] = "Dup.d"
+  
   return (list(CNA.state = CNA.state, CNA.start = CNA.start, CNA.end = CNA.end))
 }
 
