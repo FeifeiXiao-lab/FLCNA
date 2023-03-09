@@ -91,8 +91,9 @@ nopenalty <- function(K, y, N = 100, kms.iter = 100, kms.nstart = 100, eps.diff 
       alpha.temp = array(0, dim = c(N, n, K[j.tune]))
 
       for (t in 1:(N-1)) {
-        # E-step: compute all the cluster-wise density
-        temp.normal = sapply(c(1:K[j.tune]), dmvnorm_log, y = y, mu = mu[t,,], sigma = diag(sigma.iter[t,]))
+        # temp.normal = sapply(c(1:K[j.tune]), dmvnorm_log, 
+        #                      y = y, mu = mu[t, , ], sigma = diag(sigma.iter[t, ]))
+        temp.normal = dmvnorm_log_sapply(seq.max=K[j.tune],y = y, mu = mu[t, , ], sigma.iter = sigma.iter[t, ],batch.size=50)
 
         alpha.fn = function(k, log.dens = temp.normal, p.temp = p[t,]){
           if(p.temp[k] == 0){
@@ -158,15 +159,30 @@ nopenalty <- function(K, y, N = 100, kms.iter = 100, kms.nstart = 100, eps.diff 
       if(length(label.s) < K[j.tune]){
         llh[j.tune] = sum(table(s.hat[[j.tune]])*log(p.hat[[j.tune]][label.s]))
         for(k in label.s){
-          llh[j.tune] = llh[j.tune] + sum(dmvnorm(y[s.hat[[j.tune]]==k,], mean=mu.hat[[j.tune]][k,], sigma = diag(sigma.hat[[j.tune]]), log=TRUE))
-        }
+          # llh[j.tune] = llh[j.tune] + sum(dmvnorm(y[s.hat[[j.tune]] ==  k, ],
+          #                                         mean = mu.hat[[j.tune]][k, ], 
+          #                                         sigma = diag(sigma.hat[[j.tune]]), 
+          #                                         log = TRUE))
+          llh[j.tune] = llh[j.tune] + sum(dmvnorm_sapply(y1     =y[s.hat[[j.tune]] == k, ],
+                                                         mean1  = mu.hat[[j.tune]][k, ],
+                                                         sigma1 = diag(sigma.hat[[j.tune]]),
+                                                         batch.size=50) )   
+            }														 
       }
       ## no empty clusters
       else {
         llh[j.tune] = sum(table(s.hat[[j.tune]])*log(p.hat[[j.tune]]))
         for(k in 1:K[j.tune]){
-          llh[j.tune] = llh[j.tune] + sum(dmvnorm(y[s.hat[[j.tune]]==k,], mean=mu.hat[[j.tune]][k,], sigma = diag(sigma.hat[[j.tune]]), log=TRUE))
-        }
+          # llh[j.tune] = llh[j.tune] + sum(dmvnorm(y[s.hat[[j.tune]] == k, ],
+          #                                         mean = mu.hat[[j.tune]][k, ],
+          #                                         sigma = diag(sigma.hat[[j.tune]]),
+          #                                         log = TRUE))
+          
+          llh[j.tune] = llh[j.tune] + sum(dmvnorm_sapply(y1     =y[s.hat[[j.tune]] == k, ],
+                                                         mean1  = mu.hat[[j.tune]][k, ],
+                                                         sigma1 = diag(sigma.hat[[j.tune]]),
+                                                         batch.size=50) )        
+		}
       }
       ct.mu[j.tune] = sum(apply(mu.hat[[j.tune]], 2, count.mu, eps.diff = eps.diff))
       gic[j.tune] = -2*llh[j.tune] + log(log(n))*log(D)*(length(label.s)-1+D+ct.mu[j.tune])
