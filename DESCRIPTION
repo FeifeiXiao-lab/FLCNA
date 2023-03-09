@@ -2,7 +2,7 @@ Package: FLCNA
 Type: Package
 Title: Simultaneous CNV Detection And Subclone Clustering With Single Cell Sequencing Data
 Version: 1.0
-Date: 2022-04-19
+Date: 2023-03-08
 Authors: Fei Qin, Guoshuai Cai, Feifei Xiao
 Maintainer: Fei Qin <fqin@email.sc.edu>
 Description: We developed, FLCNA, a CNA detection method based on fused lasso model, which can simultaneously identify subclones in scDNA-seq data. 
