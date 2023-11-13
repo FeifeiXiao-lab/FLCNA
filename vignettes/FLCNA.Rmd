@@ -2,10 +2,10 @@
 title: 'FLCNA: A statistical learning method for simultaneous copy number estimation
   and subclone clustering with single cell sequencing data'
 author: "Fei Qin, Guoshuai Cai, Feifei Xiao"
-date: 'Last updated: 03/09/2023'
+date: 'Last updated: 11/09/2023'
 output:
-  word_document: null
   pdf_document: default
+  word_document: null
 fontsize: 12pt
 ---
 
@@ -19,7 +19,7 @@ We developed the FLCNA method based on a fused lasso model to detect copy number
 
 ```{r install-bioc, message=FALSE, warning = FALSE, eval=FALSE}
 library(devtools)
-install_github("FeifeiXiaoUSC/FLCNA")
+install_github("FeifeiXiao-lab/FLCNA")
 ```
 
 # 3.  Bioinformatic pre-processing
