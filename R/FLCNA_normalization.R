@@ -41,10 +41,68 @@ FLCNA_normalization <- function(Y, bin_size=100000, gc, map){
   lrr=matrix(data=NA,nrow = dim(RC_norm)[1],ncol = dim(RC_norm)[2])
   rownames(lrr)=rownames(RC_norm)
   colnames(lrr)=colnames(RC_norm)
-  for(i in 1:dim(RC_norm)[2]){
-    mean=mean(RC_norm[,i])
-    rc=RC_norm[,i]
-    lrr[,i]=log2((rc+1)/mean)
+  for(i in 1:dim(RC_norm)[1]){
+    mean=mean(RC_norm[i,])
+    rc=RC_norm[i,]
+    lrr[i,]=log2((rc+1)/mean)
+  }
+  log2Rdata=lrr
+  
+  return(log2Rdata)
+}
+
+
+
+#' @title FLCNA normalization with reference
+#' 
+#' @description Normalization function used in FLCNA.
+#' 
+#' @param Y A p-dimensional data matrix. Each row is an observation.
+#' @param bin_size The bin size used in the data the default is 100,000.
+#' @param gc A p-dimensional vector with gc concent.
+#' @param map A p-dimensional vector with mappability.
+#' @param ref_id cells used as reference.
+#'
+#'
+#' @return The log2Rdata used for main step for the FLCNA method.
+#' 
+#' @export
+FLCNA_normalization_ref <- function(Y, bin_size=100000, gc, map, ref_id){
+  
+  RCTL <- Y
+  RC_norm=matrix(data=NA,nrow = dim(RCTL)[1],ncol = dim(RCTL)[2])
+  rownames(RC_norm)=rownames(RCTL)
+  colnames(RC_norm)=colnames(RCTL)
+  for(sub in 1:dim(RCTL)[2]){
+    ### Bin size normalization only if InTarget###
+    step <- 5
+    RCLNormListIn <- CorrectSize(RCTL[,sub],L=bin_size,step)
+    RCLNormIn <- RCLNormListIn$RCNorm
+    
+    ### Mappability normalization ###
+    step <- 0.01
+    RCMAPNormListIn <- CorrectMAP(RCLNormIn,MAPContent=map,step)
+    RCMAPNormIn <- RCMAPNormListIn$RCNorm
+    
+    ### GC-content Normalization ###
+    step <- 5
+    RCGCNormListIn <- CorrectGC(RCMAPNormIn,GCContent=gc,step)
+    RCGCNormIn <- RCGCNormListIn$RCNorm
+    
+    RC_norm[,sub]=RCGCNormIn
+  }
+  
+  RC_norm <- RC_norm + matrix(rgamma(nrow(RC_norm)*ncol(RC_norm),0.1,1),nrow(RC_norm),ncol(RC_norm))
+  RC_norm1 <- RC_norm[, -ref_id]
+  ref_norm <- RC_norm[, ref_id]
+  
+  lrr=matrix(data=NA,nrow = dim(RC_norm1)[1],ncol = dim(RC_norm1)[2])
+  rownames(lrr)=rownames(RC_norm1)
+  colnames(lrr)=colnames(RC_norm1)
+  for(i in 1:dim(RC_norm1)[1]){
+    mean=mean(ref_norm[i,])
+    rc=RC_norm1[i,]
+    lrr[i,]=log2((rc+1)/mean)
   }
   log2Rdata=lrr
   
