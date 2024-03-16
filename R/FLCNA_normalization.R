@@ -41,10 +41,10 @@ FLCNA_normalization <- function(Y, bin_size=100000, gc, map){
   lrr=matrix(data=NA,nrow = dim(RC_norm)[1],ncol = dim(RC_norm)[2])
   rownames(lrr)=rownames(RC_norm)
   colnames(lrr)=colnames(RC_norm)
-  for(i in 1:dim(RC_norm)[1]){
-    mean=mean(RC_norm[i,])
-    rc=RC_norm[i,]
-    lrr[i,]=log2((rc+1)/mean)
+  for(i in 1:dim(RC_norm)[2]){
+    mean=mean(RC_norm[,i])
+    rc=RC_norm[,i]
+    lrr[,i]=log2((rc+1)/mean)
   }
   log2Rdata=lrr
   
