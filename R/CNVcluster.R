@@ -17,34 +17,44 @@
 #' @export
 #' 
 #' 
-CNA.out <- function(mean.matrix, LRR, Clusters, ref, cutoff=0.40, L=100){
+CNA.out <- function(mean.matrix, LRR, Clusters, QC_ref, cutoff=0.40, L=100){
+  
+  Chr_index <- as.numeric(gsub("^.{0,3}", "", rep(QC_ref@seqnames@values, QC_ref@seqnames@lengths)))
+  Chr_cp_index <- 1+which(abs(diff(Chr_index))>=1)
+
+  QC_cp_index <- 1+which(abs(diff(QC_ref@ranges@start,1))>median(QC_ref@ranges@width))
+
   CNAdata <- NULL
   for (s in 1:ncol(LRR)){
     g=Clusters[s]
-    cp.index <- 1+which(abs(diff(mean.matrix[g,],1))>=cutoff)
-    if ((length(cp.index) < 1) | (length(cp.index) > 10000)){ next }
+    cp.index1 <- 1+which(abs(diff(mean.matrix[g,],1))>=cutoff)
+    if ((length(cp.index1) < 1) | (length(cp.index1) > 10000)){ next }
+    cp.index <- unique(c(cp.index1, Chr_cp_index, QC_cp_index))
+    cp.index <- cp.index[order(cp.index)]
+    cp.index
     x.inv  <- try( res <- CNAcluster(Y = LRR[,s], cp=cp.index, L),  silent=TRUE)
     if ('try-error' %in% class(x.inv)) next
     if (length(x.inv$CNA.end)==0){
       next
     }
     CNAdata1 <- data.frame(sampleID=s,
-                          samplename=colnames(LRR)[s],
-                          Cluster=g,
-                          chr=rep(ref@seqnames@values, ref@seqnames@lengths)[res$CNA.start],
-                          start=res$CNA.start, 
-                          end=res$CNA.end,
-                          start.coor=ref@ranges@start[res$CNA.start],
-                          end.coor=(ref@ranges@start+ref@ranges@width)[res$CNA.end],
-                          width_bins=(res$CNA.end-res$CNA.start+1),
-                          state=res$CNA.state)
+                           samplename=colnames(LRR)[s],
+                           Cluster=g,
+                           chr=rep(QC_ref@seqnames@values, QC_ref@seqnames@lengths)[res$CNA.start],
+                           start=res$CNA.start, 
+                           end=res$CNA.end,
+                           start.coor=QC_ref@ranges@start[res$CNA.start],
+                           end.coor=(QC_ref@ranges@start+QC_ref@ranges@width)[res$CNA.end],
+                           width_bins=(res$CNA.end-res$CNA.start+1),
+                           state=res$CNA.state)
     CNAdata1 <- CNAdata1[CNAdata1$width_bins > 2,]
     CNAdata1 <- CNAdata1[CNAdata1$width_bins < 10000,]
-
+    
     CNAdata <- rbind(CNAdata, CNAdata1)
+  }
+  return(CNAdata)
 }
-return(CNAdata)
-}
+
 
 
 
