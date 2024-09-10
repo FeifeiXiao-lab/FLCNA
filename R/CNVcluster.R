@@ -3,7 +3,7 @@
 #' @description This function clusters the identified change-points to make final CNA calling. The potential CNA segments between two neighbor candidate change-points are assigned to different copy number states according to the estimated mean matrix from FLCNA R function. We use three clusters including duplication, normal state and deletion. A Gaussisan Mixture Model based clustering strategy was applied to assign each segment to the most likely cluster/state.
 #'
 #' @param mean.matrix The cluster mean matrix estimated from FLCNA R function.
-#' @param cutoff Cutoff value to further control the number of CNAs, the larger value of cutoff, the smaller number of CNAs. The default is 0.35.
+#' @param cutoff Cutoff value to further control the number of CNAs, the larger value of cutoff, the smaller number of CNAs. The default is 0.8.
 #' @param L Repeat times in the EM algorithm, defaults to 100.
 #' 
 #' 
@@ -17,7 +17,7 @@
 #' @export
 #' 
 #' 
-CNA.out <- function(mean.matrix, LRR, Clusters, QC_ref, cutoff=0.40, L=100){
+CNA.out <- function(mean.matrix, LRR, Clusters, QC_ref, cutoff=0.80, L=100){
   
   Chr_index <- as.numeric(gsub("^.{0,3}", "", rep(QC_ref@seqnames@values, QC_ref@seqnames@lengths)))
   Chr_cp_index <- 1+which(abs(diff(Chr_index))>=1)
