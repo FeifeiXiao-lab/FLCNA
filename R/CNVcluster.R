@@ -22,14 +22,15 @@ CNA.out <- function(mean.matrix, LRR, Clusters, QC_ref, cutoff=0.80, L=100){
   Chr_index <- as.numeric(gsub("^.{0,3}", "", rep(QC_ref@seqnames@values, QC_ref@seqnames@lengths)))
   Chr_cp_index <- 1+which(abs(diff(Chr_index))>=1)
 
-  QC_cp_index <- 1+which(abs(diff(QC_ref@ranges@start,1))>median(QC_ref@ranges@width))
+  #QC_cp_index <- 1+which(abs(diff(QC_ref@ranges@start,1))>median(QC_ref@ranges@width))
 
   CNAdata <- NULL
   for (s in 1:ncol(LRR)){
     g=Clusters[s]
     cp.index1 <- 1+which(abs(diff(mean.matrix[g,],1))>=cutoff)
     if ((length(cp.index1) < 1) | (length(cp.index1) > 10000)){ next }
-    cp.index <- unique(c(cp.index1, Chr_cp_index, QC_cp_index))
+    #cp.index <- unique(c(cp.index1, Chr_cp_index, QC_cp_index))
+    cp.index <- unique(c(cp.index1, Chr_cp_index))
     cp.index <- cp.index[order(cp.index)]
     cp.index
     x.inv  <- try( res <- CNAcluster(Y = LRR[,s], cp=cp.index, L),  silent=TRUE)
