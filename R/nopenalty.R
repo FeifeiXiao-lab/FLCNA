@@ -1,35 +1,54 @@
-#' @title Clustering without penalty term
-#' @description This function estimates parameters under the framework of classical mixture models without penalty term.
+#' @name nopenalty
+#' @aliases nopenalty
+#' @title Classical Model-based Clustering
+#' @description This function estimates the model-based clustering which is under the framework of finite mixture models.
 #'
+#' @usage nopenalty(K, y, N = 100, kms.iter = 100, kms.nstart = 100,
+#'            eps.diff = 1e-5, eps.em = 1e-5,
+#'            model.crit = 'gic', short.output = FALSE)
 #'
-#' @param K  A vector of the number of clusters.
-#' @param y  A p-dimensional data matrix. Each row is an observation.
+#' @param K  A vector of the number of clusters
+#' @param y  A p-dimensional data matrix. Each row is an observation
 #' @param N  The maximum number of iterations in the EM algorithm. The default value is 100.
-#' @param kms.iter The maximum number of iterations in the K-means algorithm whose outputs are the starting values for the EM algorithm.
-#' @param kms.nstart The number of starting values in K-means.
-#' @param eps.diff The lower bound of pairwise difference of two mean values. Any value lower than it is treated as 0.
+#' @param kms.iter The maximum number of iterations in the K-means algorithm whose outputs are the starting values for the EM algorithm
+#' @param kms.nstart The number of starting values in K-means
+#' @param eps.diff The lower bound of pairwise difference of two mean values. Any value lower than it is treated as 0
 #' @param eps.em The lower bound for the stopping criterion.
 #' @param model.crit The criterion used to select the number of clusters \eqn{K}. It is either `bic' for Bayesian Information Criterion or `gic' for Generalized Information Criterion.
+#' @param short.output A short version of output is needed or not. A short version is used for computing the adaptive parameters in APFP or APL1 methods. The default value is FALSE.
 #'
-#' @details This function estimates parameters \eqn{\mu}, \eqn{\Sigma}, \eqn{\pi} and the clustering assignments in the model with penalty term,
+#' @details This function estimates parameters \eqn{\mu}, \eqn{\Sigma}, \eqn{\pi} and the clustering assignments in the model-based clustering using the mixture model,
 #' \deqn{y \sim \sum_{k=1}^K \pi_k f(y|\mu_k, \Sigma)}
 #' where \eqn{f(y|\mu_k, \Sigma_k)} is the density function of Normal distribution with mean \eqn{\mu_k} and variance \eqn{\Sigma}. Here we assume that each cluster has the same diagonal variance.
 #'
+#' This function is also used to compute the adaptive parameters for functions \code{\link{apfp}} and \code{\link{apL1}}.
 #'
 #' @return This function returns the esimated parameters and some statistics of the optimal model within the given \eqn{K} and \eqn{\lambda}, which is selected by BIC when \code{model.crit = 'bic'} or GIC when \code{model.crit = 'gic'}.
 #' \item{mu.hat.best}{The estimated cluster means.}
 #' \item{sigma.hat.best}{The estimated covariance.}
 #' \item{p.hat.best}{The estimated cluster proportions.}
 #' \item{s.hat.best}{The clustering assignments.}
-#' \item{K.best}{The value of \eqn{K} that provides the optimal model.}
-#' \item{llh.best}{The log-likelihood of the optimal model.}
-#' \item{gic.best}{The GIC of the optimal model.}
-#' \item{bic.best}{The BIC of the optimal model.}
-#' \item{ct.mu.best}{The degrees of freedom in the cluster means of the optimal model.}
+#' \item{K.best}{The value of \eqn{K} that provides the optimal model}
+#' \item{llh.best}{The log-likelihood of the optimal model}
+#' \item{gic.best}{The GIC of the optimal model}
+#' \item{bic.best}{The BIC of the optimal model}
+#' \item{ct.mu.best}{The degrees of freedom in the cluster means of the optimal model}
 #'
 #' @references Fraley, C., & Raftery, A. E. (2002) Model-based clustering, discriminant analysis, and density estimation. \emph{Journal of the American statistical Association} \bold{97(458)}, 611--631.
 #'
-nopenalty <- function(K, y, N = 100, kms.iter = 100, kms.nstart = 100, eps.diff = 1e-5, eps.em = 1e-5, model.crit = 'gic'){
+#' @seealso \code{\link{apfp}} \code{\link{apL1}} \code{\link{parse}}
+#'
+#' @examples
+#' y <- rbind(matrix(rnorm(100,0,1),ncol=2), matrix(rnorm(100,4,1), ncol=2))
+#' output <- nopenalty(K = c(1:2), y)
+#' output$mu.hat.best
+#'
+#' @keywords external
+#'
+#' @export
+
+
+nopenalty <- function(K, y, N = 100, kms.iter = 100, kms.nstart = 100, eps.diff = 1e-5, eps.em = 1e-5, model.crit = 'gic', short.output = FALSE){
 
   if(missing(K) | any(dim(y)[1] < K)){
     stop(" The number of clusters 'K' must be greater than the number of observations in 'y' ")
@@ -74,12 +93,8 @@ nopenalty <- function(K, y, N = 100, kms.iter = 100, kms.nstart = 100, eps.diff 
       kms1.class = kms1$cluster
 
       mean0.fn = function(k){
-        if(length(y[kms1.class == k,1]) == 1) {
-          out = y[kms1.class == k,]
-          }
-        else {	
-          out = colMeans(y[kms1.class == k,])
-          }
+        if(length(y[kms1.class == k,1]) == 1) {out = y[kms1.class == k,]}
+        else {	out = colMeans(y[kms1.class == k,])}
         return(out)
       }
 
@@ -91,9 +106,8 @@ nopenalty <- function(K, y, N = 100, kms.iter = 100, kms.nstart = 100, eps.diff 
       alpha.temp = array(0, dim = c(N, n, K[j.tune]))
 
       for (t in 1:(N-1)) {
-        # temp.normal = sapply(c(1:K[j.tune]), dmvnorm_log, 
-        #                      y = y, mu = mu[t, , ], sigma = diag(sigma.iter[t, ]))
-        temp.normal = dmvnorm_log_sapply(seq.max=K[j.tune],y = y, mu = mu[t, , ], sigma.iter = sigma.iter[t, ],batch.size=50)
+        # E-step: compute all the cluster-wise density
+        temp.normal = sapply(c(1:K[j.tune]), dmvnorm_log, y = y, mu = mu[t,,], sigma = diag(sigma.iter[t,]))
 
         alpha.fn = function(k, log.dens = temp.normal, p.temp = p[t,]){
           if(p.temp[k] == 0){
@@ -159,30 +173,15 @@ nopenalty <- function(K, y, N = 100, kms.iter = 100, kms.nstart = 100, eps.diff 
       if(length(label.s) < K[j.tune]){
         llh[j.tune] = sum(table(s.hat[[j.tune]])*log(p.hat[[j.tune]][label.s]))
         for(k in label.s){
-          # llh[j.tune] = llh[j.tune] + sum(dmvnorm(y[s.hat[[j.tune]] ==  k, ],
-          #                                         mean = mu.hat[[j.tune]][k, ], 
-          #                                         sigma = diag(sigma.hat[[j.tune]]), 
-          #                                         log = TRUE))
-          llh[j.tune] = llh[j.tune] + sum(dmvnorm_sapply(y1     =y[s.hat[[j.tune]] == k, ],
-                                                         mean1  = mu.hat[[j.tune]][k, ],
-                                                         sigma1 = diag(sigma.hat[[j.tune]]),
-                                                         batch.size=50) )   
-            }														 
+          llh[j.tune] = llh[j.tune] + sum(dmvnorm(y[s.hat[[j.tune]]==k,], mean=mu.hat[[j.tune]][k,], sigma = diag(sigma.hat[[j.tune]]), log=TRUE))
+        }
       }
       ## no empty clusters
       else {
         llh[j.tune] = sum(table(s.hat[[j.tune]])*log(p.hat[[j.tune]]))
         for(k in 1:K[j.tune]){
-          # llh[j.tune] = llh[j.tune] + sum(dmvnorm(y[s.hat[[j.tune]] == k, ],
-          #                                         mean = mu.hat[[j.tune]][k, ],
-          #                                         sigma = diag(sigma.hat[[j.tune]]),
-          #                                         log = TRUE))
-          
-          llh[j.tune] = llh[j.tune] + sum(dmvnorm_sapply(y1     =y[s.hat[[j.tune]] == k, ],
-                                                         mean1  = mu.hat[[j.tune]][k, ],
-                                                         sigma1 = diag(sigma.hat[[j.tune]]),
-                                                         batch.size=50) )        
-		}
+          llh[j.tune] = llh[j.tune] + sum(dmvnorm(y[s.hat[[j.tune]]==k,], mean=mu.hat[[j.tune]][k,], sigma = diag(sigma.hat[[j.tune]]), log=TRUE))
+        }
       }
       ct.mu[j.tune] = sum(apply(mu.hat[[j.tune]], 2, count.mu, eps.diff = eps.diff))
       gic[j.tune] = -2*llh[j.tune] + log(log(n))*log(D)*(length(label.s)-1+D+ct.mu[j.tune])
@@ -210,9 +209,11 @@ nopenalty <- function(K, y, N = 100, kms.iter = 100, kms.nstart = 100, eps.diff 
 
   K.best = K[index.best]
 
-  output = structure(list(K.best = K.best, mu.hat.best=mu.hat.best, sigma.hat.best=sigma.hat.best, p.hat.best=p.hat.best, 
-                          s.hat.best=s.hat.best, gic.best = gic.best, bic.best=bic.best, llh.best = llh.best, 
-                          ct.mu.best = ct.mu.best), class = 'parse_fit')
-  
+  if(short.output == TRUE ){
+    output = list(mu.hat.best = mu.hat.best)
+  }
+  else {
+    output = structure(list(K.best = K.best, mu.hat.best=mu.hat.best, sigma.hat.best=sigma.hat.best, p.hat.best=p.hat.best, s.hat.best=s.hat.best, gic.best = gic.best, bic.best=bic.best, llh.best = llh.best, ct.mu.best = ct.mu.best), class = 'parse_fit')
+  }
   return(output)
 }
