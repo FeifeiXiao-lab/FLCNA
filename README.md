@@ -58,9 +58,11 @@ log2Rdata <- FLCNA_normalization(Y=QCobject$Y, gc=QCobject$ref$gc, map=QCobject$
 ```
 ```r
 # Simultaneous CNA detection and subclone clustering
-output_FLCNA <- FLCNA(K=c(3,4,5), lambda=1.5, Y=data.matrix(log2Rdata))
+output_FLCNA <- FLCNA(K=c(4,5,6), lambda=3, Y=t(log2Rdata), ref=QCobject$ref)
 ```
+
 ```r
 # CNA clustering
-CNA.output <- CNA.out(mean.matrix = output_FLCNA$mu.hat.best, LRR=log2Rdata, Clusters=output_FLCNA$s.hat.best, ref=ref, cutoff=0.8, L=100)
+CNA.output <- CNA.out_pool(mean.matrix = res$mu.hat.best, Clusters=output$s.hat.best,
+                      LRR=log2Rdata, QC_ref=QCobject$ref, cutoff=0.80, L=100)
 ```
