@@ -9,6 +9,7 @@
 #' @param N The maximum number of iterations in the EM algorithm. The default value is 100.
 #' @param kms.iter The maximum number of iterations in kmeans algorithm for generating the starting value for the EM algorithm.
 #' @param kms.nstart The number of starting values in K-means.
+#' @param ref Reference file.
 #' @param adapt.kms A indicator of using the cluster means estimated by K-means to calculate the adaptive parameters. The default value is FALSE.
 #' @param eps.diff The lower bound of pairwise difference of two mean values. Any value lower than it is treated as 0.
 #' @param eps.em The lower bound for the stopping criterion in the EM algorithm.
@@ -52,17 +53,19 @@
 #' output
 #'
 #' @export
-FLCNA <- function(tuning=NULL, K=NULL, lambda = c(1.5), Y, N = 100, kms.iter = 100, kms.nstart = 100, 
-                 adapt.kms = FALSE, eps.diff = 1e-5, eps.em = 1e-5, iter.LQA = 20, eps.LQA = 1e-5, 
-                 cutoff=0.5, L=100, model.crit = 'bic'){
+FLCNA <- function(tuning=NULL, K=NULL, lambda = NULL, y, N = 100, kms.iter = 100, kms.nstart = 100, ref,
+                          adapt.kms = FALSE, eps.diff = 1e-5, eps.em = 1e-5, iter.LQA = 20, eps.LQA = 1e-5, model.crit = 'gic'){
   ##  tuning: a matrix with 2 columns;
   ##  1st column = K (number of clusters), positive integer;
   ##  2nd column = lambda, nonnegative real number.
   
   ## ----- check invalid numbers
-  y = t(as.matrix(Y))
-  if (is.null(tuning)){
-    if(is.null(K) | is.null(lambda)){
+  y = data.matrix(y)
+  Chr_list <- as.character(rep(ref@seqnames@values, ref@seqnames@lengths))
+  chromosome.id <- as.numeric(substr(Chr_list, 4, nchar(Chr_list)))
+  
+  if (missing(tuning)){
+    if(missing(K) | missing(lambda)){
       stop("Require a matrix of tuning parameters for 'tuning' or vectors for 'K' and 'lambda' ")
     }
     else{
@@ -84,7 +87,7 @@ FLCNA <- function(tuning=NULL, K=NULL, lambda = c(1.5), Y, N = 100, kms.iter = 1
     }
   }
   
-  if(is.matrix(tuning) == TRUE){
+  else if(is.matrix(tuning) == TRUE){
     if(dim(tuning)[2] != 2){
       stop(" 'tuning' must be a vector with length 2 or a matrix with two columns")
     }
@@ -96,7 +99,7 @@ FLCNA <- function(tuning=NULL, K=NULL, lambda = c(1.5), Y, N = 100, kms.iter = 1
     }
   }
   
-  if(is.matrix(tuning) == FALSE){
+  else if(is.matrix(tuning) == FALSE){
     stop(" 'tuning' must be a vector with length 2 or a matrix with two columns")
   }
   
@@ -108,7 +111,6 @@ FLCNA <- function(tuning=NULL, K=NULL, lambda = c(1.5), Y, N = 100, kms.iter = 1
   ### --- outputs ---
   s.hat =list()	            # clustering labels
   mu.hat = list()						# cluster means
-  # CNAdata = list()          # CNA output
   sigma.hat = list()				# cluster variance
   alpha.hat = list()        # Probability for each observation to be assigned into each cluster
   p.hat = list() 				    # cluster proportion
@@ -137,9 +139,10 @@ FLCNA <- function(tuning=NULL, K=NULL, lambda = c(1.5), Y, N = 100, kms.iter = 1
       bic[j.tune]   <- -2*llh[j.tune] + log(n)*(d + ct.mu[j.tune])
     }
     
-    else if(lambda1 == 0){
+    else if(lambda1 == 0)
+    {
       temp.out <- nopenalty(K=K1, y=y, N=N, kms.iter=kms.iter, kms.nstart=kms.nstart, eps.diff=eps.diff,
-                            eps.em=eps.em, model.crit=model.crit)
+                            eps.em=eps.em, model.crit=model.crit, short.output = FALSE)
       mu.hat[[j.tune]]    <- temp.out$mu.hat.best
       sigma.hat[[j.tune]] <- temp.out$sigma.hat.best
       p.hat[[j.tune]]     <- temp.out$p.hat.best
@@ -177,7 +180,7 @@ FLCNA <- function(tuning=NULL, K=NULL, lambda = c(1.5), Y, N = 100, kms.iter = 1
       ## use kmeans' results as the adaptive parameter
       if(adapt.kms == FALSE){
         temp.out <- nopenalty(K=K1, y=y, N=N, kms.iter=kms.iter, kms.nstart=kms.nstart, eps.diff=eps.diff, 
-                              eps.em=eps.em, model.crit=model.crit)
+                              eps.em=eps.em, model.crit=model.crit, short.output = TRUE)
         mu.no.penal <- temp.out$mu.hat.best
       }
       else {
@@ -186,15 +189,11 @@ FLCNA <- function(tuning=NULL, K=NULL, lambda = c(1.5), Y, N = 100, kms.iter = 1
       
       ## array of posterior probability computed in E-step
       alpha.temp = array(0, dim=c(N,n,K1))
-    
+      
       for (t in 1:(N-1)) {
         # E-step: compute all the cluster-wise density
-        # temp.normal = sapply(c(1:K1), dmvnorm_log, y=y, mu=mu[t,,], sigma = diag(sigma.iter[t,]))
-        temp.normal = dmvnorm_log_sapply(seq.max    = K1,
-                                         y          = y,
-                                         mu         = mu[t, , ],
-                                         sigma.iter = sigma.iter[t, ],batch.size=50)
-										 
+        temp.normal = sapply(c(1:K1), dmvnorm_log, y=y, mu=mu[t,,], sigma = diag(sigma.iter[t,]))
+        
         alpha.fn = function(k, log.dens = temp.normal, p.temp = p[t,]){
           if(p.temp[k] ==0){out.alpha = rep(0,dim(log.dens)[1])}
           else {
@@ -223,9 +222,11 @@ FLCNA <- function(tuning=NULL, K=NULL, lambda = c(1.5), Y, N = 100, kms.iter = 1
         all.combined = rbind(y, mu[t,,])   # (n+K1) by d matrix
         sigma.iter[(t+1),] = sapply(c(1:d), sig.fn, all.combined=all.combined, alpha=alpha.temp[(t+1),,])
         
-        mu[(t+1),,] = t(sapply(1:K1, FLCNA_LQA, K1, index.max=index.max, mu.t.all=mu[t,,], mu.no.penal=mu.no.penal, y=y, alpha=alpha.temp[(t+1),,], 
-                             sigma.all=sigma.iter[(t+1),], iter.num = iter.LQA, eps.LQA=eps.LQA, 
-                             eps.diff=eps.diff, lambda=lambda1))
+        
+        
+        mu[(t+1),,] = t(sapply(1:K1, FLCNV_LQA_per_chr, K1, index.max=index.max, mu.t.all=mu[t,,], chromosome.id = chromosome.id, mu.no.penal=mu.no.penal, y=y, alpha=alpha.temp[(t+1),,], 
+                               sigma.all=sigma.iter[(t+1),], iter.num = iter.LQA, eps.LQA=eps.LQA, 
+                               eps.diff=eps.diff, lambda=lambda1))
         
         if(sum(abs(mu[(t+1),,]-mu[t,,]))/(sum(abs(mu[t,,]))+1)+ sum(abs(sigma.iter[(t+1),]-sigma.iter[t,]))/sum(abs(sigma.iter[t,])) + 
            sum(abs(p[(t+1),] - p[t,]))/sum(p[t,]) < eps.em){
@@ -246,10 +247,6 @@ FLCNA <- function(tuning=NULL, K=NULL, lambda = c(1.5), Y, N = 100, kms.iter = 1
         }
       }      #ends of each estimates
       
-      #CNA output
-      # message(paste0("Start output CNA data for K=",K1,", lambda=",lambda1))
-      # CNAdata[[j.tune]] <- CNA.out(mean.matrix=mu.hat[[j.tune]], cutoff=cutoff, L=L)
-      
       ## ------------ BIC and GIC ----
       label.s = sort(unique(s.hat[[j.tune]]))
       
@@ -257,22 +254,14 @@ FLCNA <- function(tuning=NULL, K=NULL, lambda = c(1.5), Y, N = 100, kms.iter = 1
       if(length(label.s) < K1){
         llh[j.tune] = sum(table(s.hat[[j.tune]])*log(p.hat[[j.tune]][label.s]))
         for(k in label.s){
-          ## llh[j.tune] = llh[j.tune] + sum(dmvnorm(y[s.hat[[j.tune]]==k,], mean=mu.hat[[j.tune]][k,], sigma = diag(sigma.hat[[j.tune]]), log=TRUE))
-		  llh[j.tune] = llh[j.tune] + sum(dmvnorm_sapply(y1     = y[s.hat[[j.tune]] ==  k, ],
-                                                         mean1  = mu.hat[[j.tune]][k, ],
-                                                         sigma1 = diag(sigma.hat[[j.tune]]),
-                                                         batch.size=50) )
+          llh[j.tune] = llh[j.tune] + sum(dmvnorm(y[s.hat[[j.tune]]==k,], mean=mu.hat[[j.tune]][k,], sigma = diag(sigma.hat[[j.tune]]), log=TRUE))
         }
       }
       ## no empty clusters
       else {
         llh[j.tune] = sum(table(s.hat[[j.tune]])*log(p.hat[[j.tune]]))
         for(k in 1:K1){
-		   ## llh[j.tune] = llh[j.tune] + sum(dmvnorm(y[s.hat[[j.tune]]==k,], mean=mu.hat[[j.tune]][k,], sigma = diag(sigma.hat[[j.tune]]), log=TRUE))
-		  llh[j.tune] = llh[j.tune] + sum(dmvnorm_sapply(y1     = y[s.hat[[j.tune]] ==  k, ],
-                                                         mean1  = mu.hat[[j.tune]][k, ],
-                                                         sigma1 = diag(sigma.hat[[j.tune]]),
-                                                         batch.size=50) )
+          llh[j.tune] = llh[j.tune] + sum(dmvnorm(y[s.hat[[j.tune]]==k,], mean=mu.hat[[j.tune]][k,], sigma = diag(sigma.hat[[j.tune]]), log=TRUE))
         }
       }
       ct.mu[j.tune] = sum(apply(mu.hat[[j.tune]], 2, count.mu, eps.diff = eps.diff))
@@ -300,13 +289,10 @@ FLCNA <- function(tuning=NULL, K=NULL, lambda = c(1.5), Y, N = 100, kms.iter = 1
   
   K.best = tuning[index.best,1]
   lambda.best = tuning[index.best,2]
-  
-  output = structure(list(K.best = K.best, mu.hat.best=mu.hat.best, sigma.hat.best=sigma.hat.best,  
-                          alpha.hat.best= alpha.hat.best, p.hat.best=p.hat.best, s.hat.best=s.hat.best, 
-                          lambda.best=lambda.best, gic.best = gic.best, bic.best=bic.best,
+  output = structure(list(K.best = K.best, mu.hat.best=mu.hat.best, sigma.hat.best=sigma.hat.best,  alpha.hat.best= alpha.hat.best, 
+                          p.hat.best=p.hat.best, s.hat.best=s.hat.best, lambda.best=lambda.best, gic.best = gic.best, bic.best=bic.best,
                           llh.best = llh.best, ct.mu.best = ct.mu.best, 
-                          K = tuning[,1], lambda = tuning[,2], 
-                          mu.hat = mu.hat, sigma.hat = sigma.hat, p.hat = p.hat, 
-                          s.hat = s.hat, gic = gic, bic = bic, llh = llh, ct.mu = ct.mu))
+                          K = tuning[,1], lambda = tuning[,2], mu.hat = mu.hat, sigma.hat = sigma.hat, p.hat = p.hat, 
+                          s.hat = s.hat, gic = gic, bic = bic, llh = llh, ct.mu = ct.mu), class = 'parse_fit')
   return(output)
 }
