@@ -20,7 +20,6 @@
 #' @param model.crit The criterion used to select the number of clusters \eqn{K}. It is either `bic' for Bayesian Information Criterion or `gic' for Generalized Information Criterion.
 #'
 #' 
-#'
 #' @return This function returns the esimated parameters and some statistics of the optimal model within the given \eqn{K} and \eqn{\lambda}, which is selected by BIC when \code{model.crit = 'bic'} or GIC when \code{model.crit = 'gic'}.
 #' \item{K.best}{The optimal number of clusters.}
 #' \item{mu.hat.best}{The estimated cluster means in the optimal model.}

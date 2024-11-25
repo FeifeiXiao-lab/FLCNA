@@ -11,16 +11,21 @@
 #' 
 #' 
 #' @return The return is the clustered CNA segments with start position, end position and copy number states.
-#' \item{state}{The CNA states assigned.}
+#' 
+#' \item{sampleID}{SampleID for the CNA.}
+#' \item{samplename}{samplename for the CNA.}
+#' \item{Cluster}{The cluster for the sample with this CNA.}
+#' \item{chr}{Chromosome of CNAs.}
 #' \item{start}{The start point of CNAs.}
 #' \item{end}{The end point of CNAs.}
-#' \item{chr}{Chromosome of CNAs.}
-#' \item{width}{The width of CNAs.}
-#'
+#' \item{state}{The CNA states assigned.}
+#' \item{start_coor}{The start coordinate of CNAs.}
+#' \item{end.coor}{The end coordinate of CNAs.}
+#' \item{width_bins}{The width of CNAs.}
+#' 
 #' @export
 #' 
-#' 
-CNA.out_pool <- function(mean.matrix, LRR, Clusters, QC_ref, cutoff=0.80, L=100){
+CNA.out <- function(mean.matrix, LRR, Clusters, QC_ref, cutoff=0.80, L=100){
   
   Chr_index <- as.numeric(gsub("^.{0,3}", "", rep(QC_ref@seqnames@values, QC_ref@seqnames@lengths)))
   Chr_cp_index <- 1+which(abs(diff(Chr_index))>=1)
@@ -74,7 +79,7 @@ CNA.out_pool <- function(mean.matrix, LRR, Clusters, QC_ref, cutoff=0.80, L=100)
 
   CNAdata1 <- CNAdata1[CNAdata1$width_bins > 2,]
   CNAdata1 <- CNAdata1[CNAdata1$width_bins < 10000,]
-  
+  CNAdata1 <- CNAdata1[, c("sampleID", "samplename", "Cluster","chr", "start", "end", "state", "start_coor", "end.coor","width_bins")]
   #CNAdata <- rbind(CNAdata, CNAdata1)
   #}
   return(CNAdata1)
@@ -98,8 +103,6 @@ CNA.out_pool <- function(mean.matrix, LRR, Clusters, QC_ref, cutoff=0.80, L=100)
 #' @return Prior parameters used for GMM to cluster CNA states.
 #' \item{priors}{Prior parameters used for GMM}
 #'
-#' @export
-#' 
 Para_init<-function (mean.matrix, LRR, ref, Clusters, cutoff = 0.8, nclusters=5){
   library("mclust")
   #Chr_index <- as.numeric(rep(ref@seqnames@values, ref@seqnames@lengths))
