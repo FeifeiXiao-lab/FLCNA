@@ -36,7 +36,7 @@ FLCNA_normalization <- function(Y, bin_size=100000, gc, map){
     RC_norm[,sub]=RCGCNormIn
   }
   
-  RC_norm <- RC_norm + matrix(rgamma(nrow(RC_norm)*ncol(RC_norm),0.1,1),nrow(RC_norm),ncol(RC_norm))
+  RC_norm <- RC_norm + matrix(rgamma(nrow(RC_norm)*ncol(RC_norm),0.1,10),nrow(RC_norm),ncol(RC_norm))
   
   lrr=matrix(data=NA,nrow = dim(RC_norm)[1],ncol = dim(RC_norm)[2])
   rownames(lrr)=rownames(RC_norm)
