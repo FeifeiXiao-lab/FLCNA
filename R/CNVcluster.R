@@ -78,7 +78,7 @@ CNA.out <- function(mean.matrix, LRR, Clusters, QC_ref, cutoff=0.80, L=100){
   CNAdata1 <- aa    
 
   CNAdata1 <- CNAdata1[CNAdata1$width_bins > 2,]
-  CNAdata1 <- CNAdata1[CNAdata1$width_bins < 1000,]
+  #CNAdata1 <- CNAdata1[CNAdata1$width_bins < 1000,]
   CNAdata1 <- CNAdata1[, c("sampleID", "samplename", "Cluster","chr", "start", "end", "state", "start.coor", "end.coor","width_bins")]
   #CNAdata <- rbind(CNAdata, CNAdata1)
   #}
